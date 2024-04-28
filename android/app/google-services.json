@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "418408372625",
+    "project_id": "login-register-todo",
+    "storage_bucket": "login-register-todo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:418408372625:android:0f3cd6791f6bf79ca6a230",
+        "android_client_info": {
+          "package_name": "com.enit.todoauth.aad.todolist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBekgsv7DqCf2kLRRUywK_R6o53-1ZEgCE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
