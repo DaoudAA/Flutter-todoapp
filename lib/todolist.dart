@@ -3,7 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'utils/utils.dart';
 import 'Detailscreen.dart';
 import 'CRUDOperations.dart';
 final taskCRUDProvider = Provider<TaskCRUD>((ref) => TaskCRUD(ref));
@@ -17,97 +17,95 @@ final taskListProvider = StreamProvider<List<DocumentSnapshot>>((ref) {
   }
 });
 
-class TodoListPage extends StatelessWidget {
+class TodoListPage extends ConsumerWidget {
   const TodoListPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Localizations Sample App',
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: [
-        Locale('en'), // English
-        Locale('fr'), //French
-      ],
-      home: CustomScrollViewExample(),
-      debugShowCheckedModeBanner: false,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Key centerKey = UniqueKey();
+    final deviceSize = context.deviceSize;
+    return Consumer(
+      builder: (context, watch, child) {
+        final taskList = watch.watch(taskListProvider);
+        return taskList.when(
+          loading: () => Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(child: Text('Error: $error')),
+          data: (tasks) {
+            return Scaffold(
+              body: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Container(
+                      width: deviceSize.width,
+                      height: deviceSize.height * 0.4,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        ),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                        itemCount: tasks.length,
+                        itemBuilder: (context, index) {
+                          final task = tasks[index];
+                          return _buildItemRow(context, ref, task);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              floatingActionButton: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FloatingActionButton(
+                    heroTag: 'list_fab',
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Swipe Actions'),
+                            content: Text(
+                              'Swipe right to update the task\nSwipe left to delete the task',
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    tooltip: 'Swipe Actions',
+                    child: Icon(Icons.lightbulb),
+                  ),
+                  SizedBox(height: 16),
+                  FloatingActionButton(
+                    heroTag: 'dialog_fab',
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AddTaskDialog(),
+                      );
+                    },
+                    tooltip: 'Add Task',
+                    child: Icon(Icons.add),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
-}
-
-class CustomScrollViewExample extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context,  WidgetRef ref) {
-    final Key centerKey = UniqueKey();
-
-    return Scaffold(
-      body: Consumer(
-        builder: (context, watch, child) {
-          final taskList = watch.watch(taskListProvider);
-          return taskList.when(
-            loading: () => Center(child: CircularProgressIndicator()),
-            error: (error, stackTrace) => Center(child: Text('Error: $error')),
-            data: (tasks) {
-              return ListView.builder(
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  final task = tasks[index];
-                  return _buildItemRow(context, ref ,task);
-                },
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            heroTag: 'list_fab',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Swipe Actions'),
-                    content: Text(
-                      'Swipe right to update the task\nSwipe left to delete the task',
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text('OK'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            tooltip: 'Swipe Actions',
-            child: Icon(Icons.lightbulb),
-          ),
-          SizedBox(height: 16),
-          FloatingActionButton(
-            heroTag: 'dialog_fab',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AddTaskDialog(),
-              );
-            },
-            tooltip: 'Add Task',
-            child: Icon(Icons.add),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildItemRow(BuildContext context,WidgetRef ref, DocumentSnapshot task) {
@@ -171,4 +169,4 @@ class CustomScrollViewExample extends ConsumerWidget {
       ),
     );
   }
-}
+
