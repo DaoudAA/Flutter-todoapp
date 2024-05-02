@@ -28,7 +28,7 @@ class AppBackground extends StatelessWidget {
         Expanded(
           child: Container(
             width: deviceSize.width,
-            color: colors.background,
+            color: colors.onInverseSurface,
             child: body,
           ),
         ),

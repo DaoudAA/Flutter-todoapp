@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'utils/utils.dart';
 import 'Detailscreen.dart';
 import 'CRUDOperations.dart';
+import 'package:gap/gap.dart';
 final taskCRUDProvider = Provider<TaskCRUD>((ref) => TaskCRUD(ref));
 final taskListProvider = StreamProvider<List<DocumentSnapshot>>((ref) {
   final fireStore = FirebaseFirestore.instance;
@@ -24,6 +25,7 @@ class TodoListPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Key centerKey = UniqueKey();
     final deviceSize = context.deviceSize;
+    final bool iscompletedtask = false;
     return Consumer(
       builder: (context, watch, child) {
         final taskList = watch.watch(taskListProvider);
@@ -31,18 +33,43 @@ class TodoListPage extends ConsumerWidget {
           loading: () => Center(child: CircularProgressIndicator()),
           error: (error, stackTrace) => Center(child: Text('Error: $error')),
           data: (tasks) {
-            return Scaffold(
-              body: SingleChildScrollView(
+            return SafeArea(
+              child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(17),
                 child: Column(
                   children: [
                     Container(
                       width: deviceSize.width,
-                      height: deviceSize.height * 0.4,
+                      height: deviceSize.height * 0.32,
                       decoration: BoxDecoration(
+                        color: context.colorScheme.inversePrimary,
                         borderRadius: BorderRadius.circular(10),
                         ),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                        itemCount: tasks.length,
+                        itemBuilder: (context, index) {
+                          final task = tasks[index];
+                          return _buildItemRow(context, ref, task);
+                        },
+                      ),
+                    ),
+                    const Gap(20),
+                    Text(
+                      'Completed',
+                      style: context.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Gap(20),
+                    Container(
+                      width: deviceSize.width,
+                      height: deviceSize.height * 0.32,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       child: ListView.builder(
                         shrinkWrap: true,
                         padding: EdgeInsets.zero,
@@ -56,7 +83,7 @@ class TodoListPage extends ConsumerWidget {
                   ],
                 ),
               ),
-              floatingActionButton: Column(
+              /*floatingActionButton: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -99,7 +126,7 @@ class TodoListPage extends ConsumerWidget {
                     child: Icon(Icons.add),
                   ),
                 ],
-              ),
+              ),*/
             );
           },
         );
@@ -143,7 +170,7 @@ class TodoListPage extends ConsumerWidget {
           ));
         },
         child: Container(
-          color: Colors.purple.withOpacity(0.1),
+          color: Color(0x9C8DB7EF),
           padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
