@@ -2,17 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:todolist/Models/Task.dart';
 
 class DetailScreen extends StatelessWidget {
-  final DocumentSnapshot task;
+  final Task task;
   const DetailScreen({Key? key,required this.task}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final t = task.data() as Map<String, dynamic>;
+    final t = task;
     return Scaffold(
       appBar: AppBar(
-        title: Text('${t['taskTitle']}' ,
+        title: Text('${t.taskTitle}' ,
           style: TextStyle(fontSize: 24.0),
         ),
       ),
@@ -24,7 +25,7 @@ class DetailScreen extends StatelessWidget {
             children: <Widget>[
               SizedBox(height: 16.0),
               Text(
-                t['taskDesc'],
+                t.taskDesc,
                 style: TextStyle(fontSize: 22.0, color: Colors.black),
               ),
             ],

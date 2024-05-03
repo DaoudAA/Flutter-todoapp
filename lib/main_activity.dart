@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todolist/AddEditScreen.dart';
 import 'package:todolist/usefulwidgets/App_background.dart';
 import 'package:todolist/utils/utils.dart';
 import 'CRUDOperations.dart';
@@ -123,11 +124,12 @@ class MainActivity extends ConsumerWidget {
             bottom: 20,
             right: 20,
             child: FloatingActionButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AddTaskDialog(),
-                );
+              onPressed: () { Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreateTaskScreen(),
+                ),
+              );
               },
               tooltip: 'Add Task',
               child: Icon(Icons.add),

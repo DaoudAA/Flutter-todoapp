@@ -22,7 +22,7 @@ class AppBackground extends StatelessWidget {
         Container(
           height: headerHeight,
           width: deviceSize.width,
-          color: colors.primary,
+          color: Colors.teal.shade200,
           child: Center(child: header),
         ),
         Expanded(

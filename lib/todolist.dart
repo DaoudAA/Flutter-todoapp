@@ -3,16 +3,23 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+import 'package:todolist/Models/Task.dart';
+import 'usefulwidgets/widgets.dart';
 import 'utils/utils.dart';
 import 'Detailscreen.dart';
 import 'CRUDOperations.dart';
 import 'package:gap/gap.dart';
 final taskCRUDProvider = Provider<TaskCRUD>((ref) => TaskCRUD(ref));
-final taskListProvider = StreamProvider<List<DocumentSnapshot>>((ref) {
+final taskListProvider = StreamProvider<List<Task>>((ref) {
   final fireStore = FirebaseFirestore.instance;
   final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
   if (currentUserUid != null) {
-    return fireStore.collection('tasks').where('userId', isEqualTo: currentUserUid).snapshots().map((snapshot) => snapshot.docs);
+    return fireStore
+        .collection('tasks')
+        .where('userId', isEqualTo: currentUserUid)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => Task.fromDocument(doc)).toList());
   } else {
     return Stream.value([]);
   }
@@ -25,10 +32,14 @@ class TodoListPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Key centerKey = UniqueKey();
     final deviceSize = context.deviceSize;
-    final bool iscompletedtask = false;
+    final dateProvider = StateProvider<DateTime>((ref) => DateTime.now());
+    final date = ref.watch(dateProvider);
+
     return Consumer(
       builder: (context, watch, child) {
         final taskList = watch.watch(taskListProvider);
+        final inCompletedTasks = _incompletedTasks(taskList.value ?? [], date);
+        final completedTasks = _completedTasks(taskList.value ?? [], date);
         return taskList.when(
           loading: () => Center(child: CircularProgressIndicator()),
           error: (error, stackTrace) => Center(child: Text('Error: $error')),
@@ -39,22 +50,9 @@ class TodoListPage extends ConsumerWidget {
                 padding: const EdgeInsets.all(17),
                 child: Column(
                   children: [
-                    Container(
-                      width: deviceSize.width,
-                      height: deviceSize.height * 0.32,
-                      decoration: BoxDecoration(
-                        color: context.colorScheme.inversePrimary,
-                        borderRadius: BorderRadius.circular(10),
-                        ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.zero,
-                        itemCount: tasks.length,
-                        itemBuilder: (context, index) {
-                          final task = tasks[index];
-                          return _buildItemRow(context, ref, task);
-                        },
-                      ),
+                    DisplayTasks(
+                      isCompletedTasks: false,
+                      tasks: inCompletedTasks,
                     ),
                     const Gap(20),
                     Text(
@@ -64,91 +62,37 @@ class TodoListPage extends ConsumerWidget {
                       ),
                     ),
                     const Gap(20),
-                    Container(
-                      width: deviceSize.width,
-                      height: deviceSize.height * 0.32,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.zero,
-                        itemCount: tasks.length,
-                        itemBuilder: (context, index) {
-                          final task = tasks[index];
-                          return _buildItemRow(context, ref, task);
-                        },
-                      ),
+                    DisplayTasks(
+                      isCompletedTasks: true,
+                      tasks: completedTasks,
                     ),
                   ],
                 ),
               ),
-              /*floatingActionButton: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  FloatingActionButton(
-                    heroTag: 'list_fab',
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('Swipe Actions'),
-                            content: Text(
-                              'Swipe right to update the task\nSwipe left to delete the task',
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text('OK'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    tooltip: 'Swipe Actions',
-                    child: Icon(Icons.lightbulb),
-                  ),
-                  SizedBox(height: 16),
-                  FloatingActionButton(
-                    heroTag: 'dialog_fab',
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AddTaskDialog(),
-                      );
-                    },
-                    tooltip: 'Add Task',
-                    child: Icon(Icons.add),
-                  ),
-                ],
-              ),*/
             );
           },
         );
       },
     );
   }
-  }
+}
 
-  Widget _buildItemRow(BuildContext context,WidgetRef ref, DocumentSnapshot task) {
+
+/*Widget _buildItemRow(BuildContext context,WidgetRef ref, DocumentSnapshot task) {
     final t = task.data() as Map<String, dynamic>;
 
     return Dismissible(
       key: UniqueKey(),
-      confirmDismiss: (direction) async  {
+      confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
           showDialog(
             context: context,
             builder: (context) => EditTaskDialog(task: task),
           );
         } else if (direction == DismissDirection.endToStart) {
-          ref.read(taskCRUDProvider).deleteTask(context, task.id);
-          }
+          await ref.read(taskCRUDProvider).deleteTask(context, task.id);
+        }
+        return false;
       },
       background: Container(
         color: Colors.cyan,
@@ -195,5 +139,21 @@ class TodoListPage extends ConsumerWidget {
         ),
       ),
     );
-  }
+  }*/
+List<Task> _incompletedTasks(List<Task> tasks, DateTime date) {
+  return tasks.where((task) => !_isCompleted(task) && _isTaskFromSelectedDate(task, date)).toList();
+}
 
+List<Task> _completedTasks(List<Task> tasks, DateTime date) {
+  return tasks.where((task) => _isCompleted(task) && _isTaskFromSelectedDate(task, date)).toList();
+}
+
+bool _isCompleted(Task task) {
+  return task.isCompleted;
+}
+bool _isTaskFromSelectedDate(Task task, DateTime selectedDate) {
+  final DateTime taskDate = task.date ;
+  return taskDate.month == selectedDate.month &&
+      taskDate.year == selectedDate.year &&
+      taskDate.day == selectedDate.day;
+}

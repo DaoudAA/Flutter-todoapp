@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todolist/Task.dart';
+import 'package:todolist/Models/Task.dart';
 //import 'package:provider/provider.dart';
 final taskListProvider = StateProvider<List<DocumentSnapshot>>((ref) => []);
 final taskCRUDProvider = Provider<TaskCRUD>((ref) => TaskCRUD(ref));
@@ -18,8 +18,7 @@ class TaskCRUD {
       ref.read(taskListProvider.notifier).state = snapshot.docs;
     }
   }
-  Future<void> addTask(BuildContext context, String title,
-      String description) async {
+  Future<void> addTask(BuildContext context, String title, String description) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final newTaskDocument = await FirebaseFirestore.instance.collection(
@@ -115,13 +114,13 @@ class TaskCRUD {
 }
 
 class EditTaskDialog extends ConsumerWidget {
-  final DocumentSnapshot task;
+  final Task task;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
   EditTaskDialog({required this.task}) {
-    titleController.text = task['taskTitle'];
-    descriptionController.text = task['taskDesc'];
+    titleController.text = task.taskTitle;
+    descriptionController.text = task.taskDesc;
   }
 
   @override
@@ -145,7 +144,7 @@ class EditTaskDialog extends ConsumerWidget {
         ElevatedButton(
           onPressed: () {
             Navigator.pop(context);
-            ref.read(taskCRUDProvider).updateTask(context, task.id, task['taskTitle'], task['taskDesc']);
+            ref.read(taskCRUDProvider).updateTask(context, task.id, task.taskTitle, task.taskDesc);
           },
           child: Text('Cancel'),
         ),
