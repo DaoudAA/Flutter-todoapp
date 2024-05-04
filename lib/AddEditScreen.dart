@@ -25,11 +25,11 @@ class CreateTaskScreen extends ConsumerWidget {
   });
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = context.colorScheme.inverseSurface;
 
     return Scaffold(
+      backgroundColor: Colors.deepPurple.shade50,
       appBar: AppBar(
-        backgroundColor: Colors.teal.shade50,
+        backgroundColor: Colors.deepPurple.shade300,
         title: const DisplayWhiteText(
           text: 'Add New Task',
         ),
@@ -56,94 +56,18 @@ class CreateTaskScreen extends ConsumerWidget {
                   autocorrect: false,
                   controller: _titleController,
                   decoration: InputDecoration(
+                    filled:true,
+                    fillColor: Colors.deepPurple.shade400.withOpacity(0.1),
                     hintText: 'Task Title',
-                    suffixIcon: null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(
+                        color: Colors.deepPurple.shade400,
+                        width: 2.0,
+                      ),
+                    ),
                   ),
                   maxLines: null,
-                ),
-              ],
-            ),
-            const Gap(30),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Task Description',
-                  style: context.textTheme.titleLarge,
-                ),
-                const Gap(10),
-                TextField(
-                  readOnly: false,
-                  onTapOutside: (event) {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                  },
-                  autocorrect: false,
-                  controller: _descController,
-                  decoration: InputDecoration(
-                    hintText: 'Task Description',
-                    suffixIcon: null,
-                  ),
-                  maxLines: 6,
-                ),
-              ],
-            ),
-            const Gap(30),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Date',
-                        style: context.textTheme.titleLarge,
-                      ),
-                      const Gap(10),
-                      TextField(
-                        readOnly: true,
-                        onTap: () => _selectDate(context, ref),
-                        autocorrect: false,
-                        controller: null,
-                        decoration: InputDecoration(
-                          hintText: Helpers.dateFormatter(ref.watch(
-                              dateProvider)),
-                          suffixIcon: IconButton(
-                            onPressed: () => _selectDate(context, ref),
-                            icon: const Icon(Icons.calendar_month),
-                          ),
-                        ),
-                        maxLines: null,
-                      ),
-                    ],
-                  ),
-                ),
-                const Gap(10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Time',
-                        style: context.textTheme.titleLarge,
-                      ),
-                      const Gap(10),
-                      TextField(
-                        readOnly: true,
-                        onTap: () => _selectTime(context, ref),
-                        autocorrect: false,
-                        controller: null,
-                        decoration: InputDecoration(
-                          hintText: Helpers.timeToString(ref.watch(
-                              timeProvider)),
-                          suffixIcon: IconButton(
-                            onPressed: () => _selectTime(context, ref),
-                            icon: const Icon(Icons.access_time),
-                          ),
-                        ),
-                        maxLines: null,
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
@@ -181,7 +105,7 @@ class CreateTaskScreen extends ConsumerWidget {
                               color: category.color.withOpacity(0.3),
                               border: Border.all(
                                 width: 2,
-                                color: category.color.withOpacity(0.3),
+                                color: category.color.withOpacity(1),
                               ),
                             ),
                             child: Center(
@@ -189,7 +113,7 @@ class CreateTaskScreen extends ConsumerWidget {
                                 category.icon,
                                 color: selectedCategory == category
                                     ? context.colorScheme.primary
-                                    : category.color.withOpacity(0.5),
+                                    : category.color.withOpacity(1),
                               ),
                             ),
                           ),
@@ -202,7 +126,121 @@ class CreateTaskScreen extends ConsumerWidget {
               ),
             ),
             const Gap(30),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Date',
+                        style: context.textTheme.titleLarge,
+                      ),
+                      const Gap(10),
+                      TextField(
+                        readOnly: true,
+                        onTap: () => _selectDate(context, ref),
+                        autocorrect: false,
+                        controller: null,
+                        decoration: InputDecoration(
+                          filled:true,
+                          fillColor: Colors.deepPurple.shade400.withOpacity(0.1),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(
+                              color: Colors.deepPurple.shade400,
+                              width: 2.0,
+                            ),
+                          ),
+                          hintText: Helpers.dateFormatter(ref.watch(
+                              dateProvider)),
+                          suffixIcon: IconButton(
+                            onPressed: () => _selectDate(context, ref),
+                            icon: const Icon(Icons.calendar_month),
+                          ),
+                        ),
+                        maxLines: null,
+                      ),
+                    ],
+                  ),
+                ),
+                const Gap(10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Time',
+                        style: context.textTheme.titleLarge,
+                      ),
+                      const Gap(10),
+                      TextField(
+                        readOnly: true,
+                        onTap: () => _selectTime(context, ref),
+                        autocorrect: false,
+                        controller: null,
+                        decoration: InputDecoration(
+                          filled:true,
+                          fillColor: Colors.deepPurple.shade400.withOpacity(0.1),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(
+                              color: Colors.deepPurple.shade400,
+                              width: 2.0,
+                            ),
+                          ),
+                          hintText: Helpers.timeToString(ref.watch(
+                              timeProvider)),
+                          suffixIcon: IconButton(
+                            onPressed: () => _selectTime(context, ref),
+                            icon: const Icon(Icons.access_time),
+                          ),
+                        ),
+                        maxLines: null,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const Gap(30),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Task Description',
+                  style: context.textTheme.titleLarge,
+                ),
+                const Gap(10),
+                TextField(
+                  readOnly: false,
+                  onTapOutside: (event) {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  },
+                  autocorrect: false,
+                  controller: _descController,
+                  decoration: InputDecoration(
+                    filled:true,
+                    fillColor: Colors.deepPurple.shade400.withOpacity(0.1),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(
+                        color: Colors.deepPurple.shade400,
+                        width: 2.0,
+                      ),
+                    ),
+                    hintText: 'Task Description',
+                    suffixIcon: null,
+                  ),
+                  maxLines: 6,
+                ),
+              ],
+            ),
+            const Gap(30),
             ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.deepPurple.shade300),
+              ),
               onPressed: () => _createTask(context, ref),
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
@@ -261,7 +299,6 @@ class CreateTaskScreen extends ConsumerWidget {
       );
     }
   }
-
 
   void _selectDate(BuildContext context, WidgetRef ref) async {
     DateTime? pickedDate = await showDatePicker(

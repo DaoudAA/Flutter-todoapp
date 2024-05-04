@@ -12,9 +12,11 @@ class DetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = task;
     return Scaffold(
+      backgroundColor: Colors.deepPurple.shade50,
       appBar: AppBar(
+        backgroundColor: Colors.deepPurple.withOpacity(0.3),
         title: Text('${t.taskTitle}' ,
-          style: TextStyle(fontSize: 24.0),
+          style: TextStyle(fontSize: 24.0, color: Colors.grey.shade900),
         ),
       ),
       body: Padding(
@@ -26,7 +28,25 @@ class DetailScreen extends StatelessWidget {
               SizedBox(height: 16.0),
               Text(
                 t.taskDesc,
-                style: TextStyle(fontSize: 22.0, color: Colors.black),
+                style: TextStyle(fontSize: 22.0, color: Colors.grey.shade900),
+              ),
+              SizedBox(height: 16.0),
+              Row(
+                children: [
+                  Icon(Icons.access_time),
+                  SizedBox(width: 4.0),
+                  Text(
+                    '${t.time.hour}:${t.time.minute}',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                  SizedBox(width: 16.0),
+                  Icon(Icons.category),
+                  SizedBox(width: 4.0),
+                  Text(
+                    t.category.toString(), // Assuming category is a String
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ],
               ),
             ],
           )

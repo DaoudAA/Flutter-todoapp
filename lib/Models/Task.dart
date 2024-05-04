@@ -51,6 +51,20 @@ class Task {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'taskTitle': taskTitle,
+      'taskDesc': taskDesc,
+      'userId': userId,
+      'category': category.toString(),
+      'priority': priority.toString(),
+      'date': date.toIso8601String(),
+      'time': time.toString(),
+      'isCompleted': isCompleted,
+    };
+  }
+
   factory Task.fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
