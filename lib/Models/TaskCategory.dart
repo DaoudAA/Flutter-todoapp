@@ -9,15 +9,7 @@ enum TaskCategory {
   work(Icons.work, Colors.amber),
   others(Icons.calendar_month_rounded, Colors.purple);
 
-  static TaskCategory stringToTaskCategory(String name) {
-    try {
-      return TaskCategory.values.firstWhere(
-            (category) => category.name == name,
-      );
-    } catch (e) {
-      return TaskCategory.others;
-    }
-  }
+
 
   final IconData icon;
   final Color color;

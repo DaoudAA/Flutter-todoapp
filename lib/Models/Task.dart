@@ -5,15 +5,14 @@ import 'TaskCategory.dart';
 import 'TaskPriority.dart';
 
 class Task {
-  String id;
-  String taskTitle;
-  String taskDesc;
-  String userId;
-  TaskCategory category;
-  TaskPriority priority;
-  DateTime date;
-  TimeOfDay time;
-  bool isCompleted;
+  final  String id;
+  final String taskTitle;
+  final String taskDesc;
+  final String userId;
+  final TaskCategory category;
+  final TaskPriority priority;
+  final DateTime date;
+  final bool isCompleted;
 
   Task({
     required this.id,
@@ -23,7 +22,6 @@ class Task {
     required this.category,
     required this.priority,
     required this.date,
-    required this.time,
     required this.isCompleted,
   });
 
@@ -35,7 +33,6 @@ class Task {
     TaskCategory? category,
     TaskPriority? priority,
     DateTime? date,
-    TimeOfDay? time,
     bool? isCompleted,
   }) {
     return Task(
@@ -46,46 +43,63 @@ class Task {
       category: category ?? this.category,
       priority: priority ?? this.priority,
       date: date ?? this.date,
-      time: time ?? this.time,
       isCompleted: isCompleted ?? this.isCompleted,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'taskTitle': taskTitle,
       'taskDesc': taskDesc,
       'userId': userId,
       'category': category.toString(),
       'priority': priority.toString(),
-      'date': date.toIso8601String(),
-      'time': time.toString(),
+      'date': Timestamp.fromDate(date),
       'isCompleted': isCompleted,
     };
   }
 
-  factory Task.fromDocument(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory Task.fromFirestore(DocumentSnapshot doc) {
+    final Map<String, dynamic>? map = doc.data() as Map<String, dynamic>?;
 
-    // Provide default values or handle null values
-    final category = data['category'] != null ? TaskCategory.stringToTaskCategory(data['category']) : TaskCategory.others;
-    final priority = data['priority'] != null ? TaskPriority.stringToTaskPriority(data['priority']) : TaskPriority.Low;
-    final timestamp = data['date'] as Timestamp?; // Retrieve the Timestamp object
-    final date = timestamp != null ? timestamp.toDate() : DateTime.now(); // Extract the DateTime from the Timestamp
-    final time = timestamp != null ? TimeOfDay.fromDateTime(timestamp.toDate()) : TimeOfDay.now(); // Extract the TimeOfDay
-    final isCompleted = data['isCompleted'] ?? false;
+    if (map == null) {
+      throw Exception('Failed to load task from Firestore');
+    }
+
+    map.forEach((key, value) {
+      print('$key: $value');
+    });
+
+    final categoryString = map['category'] as String?;
+    TaskCategory category;
+    if (categoryString!= null) {
+      category = TaskCategory.values.firstWhere(
+            (element) => element.toString() == categoryString,
+        orElse: () => TaskCategory.others,
+      );
+    } else {
+      category = TaskCategory.others;
+    }
+
+    TaskPriority priority;
+    final priorityString = map['priority'] as String?;
+    if (priorityString!= null) {
+      // You should handle priority string to TaskPriority conversion
+      priority = TaskPriority.Low; // Default priority
+    } else {
+      priority = TaskPriority.Low; // Default priority
+    }
 
     return Task(
       id: doc.id,
-      taskTitle: data['taskTitle'] ?? '',
-      taskDesc: data['taskDesc'] ?? '',
-      userId: data['userId'] ?? '',
+      taskTitle: map['taskTitle']?? '',
+      taskDesc: map['taskDesc']?? '',
+      userId: map['userId']?? '',
       category: category,
       priority: priority,
-      date: date,
-      time: time,
-      isCompleted: isCompleted,
+      date: (map['date'] as Timestamp?)?.toDate()?? DateTime.now(),
+      isCompleted: map['isCompleted']?? false,
     );
   }
+
 }

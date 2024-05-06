@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:todolist/CRUDOperations.dart';
 import 'package:todolist/Models/TaskPriority.dart';
 import 'package:todolist/usefulwidgets/widgets.dart';
 import 'package:todolist/utils/utils.dart';
@@ -14,7 +16,7 @@ class CreateTaskScreen extends ConsumerWidget {
   final taskListProvider = StateProvider<List<DocumentSnapshot>>((ref) => []);
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
-  final categoryProvider = StateProvider.autoDispose<TaskCategory>((ref) {
+  final categoryProvider = StateProvider.autoDispose<TaskCategory?>((ref) {
     return TaskCategory.others;
   });
   final dateProvider = StateProvider<DateTime>((ref) {
@@ -93,9 +95,7 @@ class CreateTaskScreen extends ConsumerWidget {
 
                         return InkWell(
                           onTap: () {
-                            ref
-                                .read(categoryProvider.notifier)
-                                .state = category;
+                            ref.read(categoryProvider.notifier).state = category;
                           },
                           borderRadius: BorderRadius.circular(30),
                           child: Container(
@@ -237,17 +237,21 @@ class CreateTaskScreen extends ConsumerWidget {
               ],
             ),
             const Gap(30),
-            ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.deepPurple.shade300),
-              ),
-              onPressed: () => _createTask(context, ref),
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: DisplayWhiteText(
-                  text: 'Save',
+             ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.deepPurple.shade300),
                 ),
-              ),
+                onPressed: () {
+                  _createTask(context, ref);
+                  Navigator.pop(context);
+                },
+
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: DisplayWhiteText(
+                    text: 'Save',
+                  ),
+                ),
             ),
             const Gap(30),
           ],
@@ -262,23 +266,24 @@ class CreateTaskScreen extends ConsumerWidget {
     final description = _descController.text.trim();
     final date = ref.watch(dateProvider);
     final time = ref.watch(timeProvider);
-    final category = ref.watch(categoryProvider).toString();
+    final category = ref.watch(categoryProvider) ?? TaskCategory.others;
     final user = FirebaseAuth.instance.currentUser;
+    if (title.isNotEmpty && description.isNotEmpty) {
+    final task = Task(
+      id: '',
+      taskTitle: title,
+      taskDesc: description,
+      userId: user?.uid ?? '',
+      category: category,
+      priority: TaskPriority.Low,
+      date: DateTime(date.year, date.month, date.day, time.hour, time.minute),
+      isCompleted: false,
+    );
+    print('${task.taskTitle} ${task.category.toString()}');
+    await ref.read(taskCRUDProvider).addTask(context, task);
 
-    if (title.isNotEmpty && description.isNotEmpty && user != null) {
-      final newTaskDocument = await FirebaseFirestore.instance.collection('tasks').add({
-        'taskTitle': title,
-        'taskDesc': description,
-        'date': Timestamp.fromDate(DateTime(date.year, date.month, date.day, time.hour, time.minute)),
-        'category': category,
-        'userId': user.uid,
-      });
 
-      final newTaskSnapshot = await newTaskDocument.get();
-
-      ref.read(taskListProvider.notifier).state.add(newTaskSnapshot);
-
-      ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             'Task created successfully',
