@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../main_activity.dart';
+
 @immutable
 class Helpers {
   const Helpers._();
@@ -23,16 +25,13 @@ class Helpers {
   }
 
   static void selectDate(BuildContext context, WidgetRef ref) async {
-    final dateProvider = StateProvider<DateTime>((ref) {
-      return DateTime.now();
-    });
-    final initialDate = ref.read(dateProvider);
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: initialDate,
+      initialDate: ref.read(dateProvider),
       firstDate: DateTime(2023),
       lastDate: DateTime(2060),
     );
+    print('$pickedDate.toString()********************************************');
 
     if (pickedDate != null) {
       ref.read(dateProvider.notifier).state = pickedDate;

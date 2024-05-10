@@ -1,14 +1,12 @@
 
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:holding_gesture/holding_gesture.dart';
 import 'package:todolist/CRUDOperations.dart';
 import 'package:todolist/utils/extensions.dart';
 
 import '../DetailScreen.dart';
 import '../Models/Task.dart';
+import '../utils/helpers.dart';
 
 class DisplayTasks extends ConsumerWidget {
   const DisplayTasks({
@@ -48,7 +46,7 @@ class DisplayTasks extends ConsumerWidget {
         itemBuilder: (ctx, index) {
           final task = tasks[index];
           print('${task.taskTitle} ${task.category.toString()}');
-          final dateString = task.date.toString();
+
           final textDecoration =
           task.isCompleted ? TextDecoration.lineThrough : TextDecoration.none;
 
@@ -135,8 +133,7 @@ class DisplayTasks extends ConsumerWidget {
                             ),
                             SizedBox(height: 8.0),
                             Text(
-                              '${task.date.hour}:${task.date.minute}',
-                              // to format the date into timetask.date.toString(),
+                              '${Helpers.timeToString(TimeOfDay.fromDateTime(task.date))} on ${Helpers.dateFormatter(task.date)}',
                               style: TextStyle(fontSize: 13.0, color: Colors.grey),
                             ),
                           ],

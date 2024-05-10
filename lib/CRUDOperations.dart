@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -6,11 +8,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:todolist/Models/Task.dart';
-import 'package:todolist/todolist.dart';
 import 'package:todolist/utils/extensions.dart';
 
 import 'Models/TaskCategory.dart';
-import 'main_activity.dart';
+
 import 'utils/helpers.dart';
 
 //extends StateNotifier<List<Task>>
@@ -90,7 +91,7 @@ class TaskCRUD {
 
   Future<void> updateTask(BuildContext context, Task task) async {
     final taskRef = FirebaseFirestore.instance.collection('tasks').doc(task.id);
-    final currtask = await taskRef.get();
+
     final taskData = task.toJson();
     taskData.remove('id');
     taskData.remove('userId');
@@ -106,7 +107,7 @@ class TaskCRUD {
       }).toList();
 
       ref.read(taskListProvider.notifier).state = updatedList;
-      ref.refresh(taskListProvider);
+
   }
 }
   class AddTaskDialog extends ConsumerWidget {
@@ -139,8 +140,6 @@ class TaskCRUD {
         ),
         ElevatedButton(
           onPressed: () {
-            final title = titleController.text;
-            final description = descriptionController.text;
             //ref.read(taskCRUDProvider).addTask(context, title, description);
             Navigator.pop(context);
           },
@@ -180,7 +179,7 @@ class TaskCRUD {
 final categoryProvider = StateProvider.autoDispose<TaskCategory?>((ref) {
   return TaskCategory.others;
 });
-final dateProvider = StateProvider<DateTime>((ref) {
+final dateProvider1 = StateProvider<DateTime>((ref) {
   return DateTime.now();
 });
 final timeProvider = StateProvider.autoDispose<TimeOfDay>((ref) {
@@ -380,7 +379,7 @@ class EditTaskDialog extends ConsumerWidget{
                                     width: 2.0,
                                   ),
                                 ),
-                                hintText: Helpers.dateFormatter(ref.watch(dateProvider)),
+                                hintText: Helpers.dateFormatter(ref.watch(dateProvider1)),
                                 suffixIcon: IconButton(
                                   onPressed: () =>
                                       _selectDate(context, ref ),
@@ -452,9 +451,9 @@ class EditTaskDialog extends ConsumerWidget{
                             taskDesc: newDescription,
                             category: ref.watch(categoryProvider),
                             date: DateTime(
-                              ref.watch(dateProvider).year,
-                              ref.watch(dateProvider).month,
-                              ref.watch(dateProvider).day,
+                              ref.watch(dateProvider1).year,
+                              ref.watch(dateProvider1).month,
+                              ref.watch(dateProvider1).day,
                               ref.watch(timeProvider).hour,
                               ref.watch(timeProvider).minute,
                             ),
@@ -477,12 +476,12 @@ class EditTaskDialog extends ConsumerWidget{
   void _selectDate(BuildContext context, WidgetRef ref) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: ref.watch(dateProvider),
+      initialDate: ref.watch(dateProvider1),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (pickedDate != null) {
-      ref.read(dateProvider.notifier).state = pickedDate;
+      ref.read(dateProvider1.notifier).state = pickedDate;
     }
   }
 

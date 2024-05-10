@@ -1,16 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 import 'package:todolist/Models/Task.dart';
 import 'package:todolist/main_activity.dart';
 import 'usefulwidgets/widgets.dart';
 import 'utils/utils.dart';
-import 'Detailscreen.dart';
 import 'CRUDOperations.dart';
 import 'package:gap/gap.dart';
 final taskCRUDProvider = Provider<TaskCRUD>((ref) => TaskCRUD(ref));
@@ -28,7 +25,7 @@ final taskCRUDProvider = Provider<TaskCRUD>((ref) => TaskCRUD(ref));
   }
 });*/
 final taskListProvider = StreamProvider<List<Task>>((ref) {
-  print('taskListProvider: Started');
+  //print('taskListProvider: Started');
   final fireStore = FirebaseFirestore.instance;
   final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
   print('taskListProvider: currentUserUid = $currentUserUid');
@@ -39,14 +36,12 @@ final taskListProvider = StreamProvider<List<Task>>((ref) {
         .where('userId', isEqualTo: currentUserUid)
         .snapshots()
         .map((snapshot) {
-      print('taskListProvider: Got snapshot with ${snapshot.docs.length} documents');
       return snapshot.docs.map((doc) {
-        print('taskListProvider: Converting document ${doc.id} to Task');
         return Task.fromFirestore(doc);
       }).toList();
     });
   } else {
-    print('taskListProvider: No user logged in, returning empty list');
+    //print('taskListProvider: No user logged in, returning empty list');
     return Stream.value([]);
   }
 });
@@ -55,17 +50,14 @@ class TodoListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Key centerKey = UniqueKey();
-    final deviceSize = context.deviceSize;
-    final dateProvider = StateProvider<DateTime>((ref) => DateTime.now());
-    final date = ref.watch(dateProvider);
-
     final taskList = ref.watch(taskListProvider);
+
 
     return taskList.when(
       loading: () => Center(child: CircularProgressIndicator()),
       error: (error, stackTrace) => Center(child: Text('Error: $error')),
       data: (tasks) {
+        final date = ref.watch(dateProvider);
         final inCompletedTasks = _incompletedTasks(tasks, date);
         final completedTasks = _completedTasks(tasks, date);
         return SafeArea(
@@ -99,6 +91,7 @@ class TodoListPage extends ConsumerWidget {
   }
 }
 List<Task> _incompletedTasks(List<Task> tasks, DateTime date) {
+  print('$date.toString() ---------------------------------------------------------');
   return tasks.where((task) => !_isCompleted(task) && _isTaskFromSelectedDate(task, date)).toList();
 }
 
